@@ -1,0 +1,11 @@
+---
+- name: copy tuners config
+  template:
+    src: tuners.yml.j2
+    dest: /usr/lib/node_modules/mirakurun/config/tuners.yml
+  notify:
+    - restart mirakurun
+
+- name: scan channels
+  command: curl -X PUT "http://localhost:40772/api/config/channels/scan"
+  when: no

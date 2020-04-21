@@ -6,4 +6,5 @@
   roles:
     - { role: "basic", tag: "basic" }
     - { role: "mirakurun", tag: "mirakurun" }
+    - { role: "setting", tag: "setting" }
     - { role: "epgstation", tag: "epgstation" }
