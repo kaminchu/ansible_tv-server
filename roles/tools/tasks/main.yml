@@ -1,0 +1,125 @@
+---
+- name: Install a list of packages
+  apt:
+    pkg:
+    - build-essential
+    - curl
+    - git
+    - vainfo
+    - python-dev
+    state: latest
+    update_cache: yes
+
+- name: check node
+  command: which node
+  register: check_node
+  ignore_errors: yes
+  changed_when: no
+
+- name: download setup_nodejs
+  get_url:
+    url: https://deb.nodesource.com/setup_12.x
+    dest: /tmp/setup_nodejs.sh
+  when: check_node is failed
+
+- name: setup nodejs
+  command: sh /tmp/setup_nodejs.sh
+  when: check_node is failed
+
+- name: cleanup setup_nodejs
+  file:
+    path: /tmp/setup_nodejs.sh
+    state: absent
+  when: check_node is failed
+
+- name: Install nodejs
+  apt:
+    pkg:
+    - nodejs
+    state: latest
+    update_cache: yes
+  when: check_node is failed
+
+- name: check pm2
+  command: which pm2
+  register: check_pm2
+  ignore_errors: yes
+  changed_when: no
+
+- name: Install "pm2" node.js package.
+  npm:
+    name: pm2
+    global: yes
+  when: check_pm2 is failed
+
+- name: pm2 startup
+  command: pm2 startup
+  when: check_pm2 is failed
+
+- name: install ffmpeg
+  apt:
+    pkg:
+    - ffmpeg
+    state: latest
+    update_cache: yes
+  when: use_apt_ffmpeg
+
+- name: download ffmpeg
+  get_url:
+    url: https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-4.2.1-amd64-static.tar.xz
+    dest: /tmp/ffmpeg.tar.xz
+  when: not use_apt_ffmpeg
+
+- name: make unarchive directory
+  file:
+    path: /tmp/ffmpeg
+    state: directory
+    force: yes
+  when: not use_apt_ffmpeg
+
+- name: unarchive ffmpeg
+  unarchive:
+    src: /tmp/ffmpeg.tar.xz
+    dest: /tmp/ffmpeg
+    extra_opts:
+      - --strip-components
+      - "1"
+    remote_src: yes
+  when: not use_apt_ffmpeg
+
+- name: set ffmpeg
+  copy:
+    src: /tmp/ffmpeg/ffmpeg
+    dest: /usr/local/bin/ffmpeg
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+  when: not use_apt_ffmpeg
+
+- name: set ffmpeg link
+  copy:
+    src: "/tmp/ffmpeg/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+  with_items:
+    - ffmpeg
+    - ffprobe
+  when: not use_apt_ffmpeg
+
+- name: Create a symbolic link for ffmpeg
+  file:
+    src: "/usr/local/bin/{{ item.src }}"
+    dest: "/usr/local/bin/{{ item.dest }}"
+    owner: root
+    group: root
+    state: link
+    mode: '0755'
+  with_items:
+    - { src: "ffmpeg", dest: "avconv" }
+    - { src: "ffprobe", dest: "avprobe" }
+  when: not use_apt_ffmpeg
+

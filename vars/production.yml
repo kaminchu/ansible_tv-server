@@ -1,0 +1,7 @@
+---
+epgstation_port: 8888
+epgstation_mirakurun_path: "http://192.168.136.102:40772/"
+epgstation_user: user
+epgstation_password: password
+epgstation_enable_vaapi: yes
+use_apt_ffmpeg: yes

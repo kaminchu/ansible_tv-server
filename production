@@ -1,0 +1,5 @@
+[server]
+epgstation
+
+[all:vars]
+stage=production

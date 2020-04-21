@@ -1,0 +1,8 @@
+---
+- hosts: all
+  vars_files:
+    - vars/{{ stage }}.yml
+  become: yes
+  roles:
+    - { role: "tools", tag: "tools" }
+    - { role: "epgstation", tag: "epgstation" }

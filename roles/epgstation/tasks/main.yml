@@ -1,0 +1,88 @@
+---
+- name: create group
+  group:
+    name: epgstation
+
+- name: create user
+  user:
+    name: epgstation
+    group: epgstation
+    shell: /bin/bash
+    create_home: yes
+
+- name: get epgstation
+  git:
+    repo: https://github.com/l3tnun/EPGStation.git
+    dest: /home/epgstation/EPGStation
+    clone: yes
+  become: yes
+  become_user: epgstation
+
+- name: check node_modules
+  stat:
+    path: /home/epgstation/EPGStation/node_modules
+  register: modules_dir
+  changed_when: no
+
+- name: npm install
+  command:
+    cmd: npm install
+    chdir: /home/epgstation/EPGStation
+  become: yes
+  become_user: epgstation
+  when: not modules_dir.stat.exists
+
+- name: check build directory
+  stat:
+    path: /home/epgstation/EPGStation/dist
+  register: build_dir
+  changed_when: no
+
+- name: npm run build
+  command:
+    cmd: npm run build
+    chdir: /home/epgstation/EPGStation
+  become: yes
+  become_user: epgstation
+  when: not build_dir.stat.exists
+
+- name: copy config
+  template:
+    src: config.json.j2
+    dest: /home/epgstation/EPGStation/config/config.json
+  become: yes
+  become_user: epgstation
+
+- name: copy other config
+  copy:
+    src: "/home/epgstation/EPGStation/config/{{ item }}.sample.json"
+    dest: "/home/epgstation/EPGStation/config/{{ item }}.json"
+    remote_src: yes
+  with_items:
+    - operatorLogConfig
+    - serviceLogConfig
+  become: yes
+  become_user: epgstation
+
+- name: check pm2
+  command: pm2 list
+  register: pm2_status
+  become: yes
+  become_user: epgstation
+  changed_when: no
+
+- name: start epgstatin
+  command:
+    cmd: pm2 start dist/server/index.js --name "epgstation-app"
+    chdir: /home/epgstation/EPGStation
+  become: yes
+  become_user: epgstation
+  when: '"epgstation-app" not in pm2_status.stdout'
+
+- name: start epgstatin save
+  command:
+    cmd: pm2 save
+    chdir: /home/epgstation/EPGStation
+  become: yes
+  become_user: epgstation
+  when: '"epgstation-app" not in pm2_status.stdout'
