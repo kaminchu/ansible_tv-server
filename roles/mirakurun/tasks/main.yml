@@ -1,0 +1,11 @@
+---
+- name: check mirakurun
+  command: which mirakurun
+  register: check_mirakurun
+  ignore_errors: yes
+  changed_when: no
+
+- name: install mirakurun
+  command:
+    cmd: npm install mirakurun -g --unsafe --production
+  when: check_mirakurun is failed

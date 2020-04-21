@@ -67,22 +67,16 @@
 - name: check pm2
   command: pm2 list
   register: pm2_status
-  become: yes
-  become_user: epgstation
   changed_when: no
 
 - name: start epgstatin
   command:
     cmd: pm2 start dist/server/index.js --name "epgstation-app"
     chdir: /home/epgstation/EPGStation
-  become: yes
-  become_user: epgstation
   when: '"epgstation-app" not in pm2_status.stdout'
 
 - name: start epgstatin save
   command:
     cmd: pm2 save
     chdir: /home/epgstation/EPGStation
-  become: yes
-  become_user: epgstation
   when: '"epgstation-app" not in pm2_status.stdout'

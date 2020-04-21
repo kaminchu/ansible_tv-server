@@ -3,13 +3,8 @@
     "serverPort": {{ epgstation_port }},
     "mirakurunPath": "{{ epgstation_mirakurun_path }}",
     "dbType": "sqlite3",
-{% if use_apt_ffmpeg %}
-    "ffmpeg": "/usr/bin/ffmpeg",
-    "ffprobe": "/usr/bin/ffprobe",
-{% else %}
-    "ffmpeg": "/usr/local/bin/ffmpeg",
-    "ffprobe": "/usr/local/bin/ffprobe",
-{% endif %}
+    "ffmpeg": "/snap/bin/ffmpeg",
+    "ffprobe": "/snap/bin/ffmpeg.ffprobe",
     "maxEncode": 2,
     "basicAuth": {
         "user": "{{ epgstation_user }}",

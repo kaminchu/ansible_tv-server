@@ -4,5 +4,6 @@
     - vars/{{ stage }}.yml
   become: yes
   roles:
-    - { role: "tools", tag: "tools" }
+    - { role: "basic", tag: "basic" }
+    - { role: "mirakurun", tag: "mirakurun" }
     - { role: "epgstation", tag: "epgstation" }
