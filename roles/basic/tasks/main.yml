@@ -9,6 +9,7 @@
       - build-essential
       - curl
       - git
+      - nano
       - vainfo
       - python-dev
     state: latest

@@ -1,8 +1,13 @@
 ---
+- name: check recdvb
+  command: which recdvb
+  register: check_recdvb
+  ignore_errors: yes
+  changed_when: no
+
 - name: Install a list of packages
   apt:
     pkg:
-      - nano
       - ntp
       - wget
       - curl
@@ -28,32 +33,27 @@
       - pkg-config
     state: latest
     update_cache: yes
-
-- name: check firmware
-  stat:
-    path:  /lib/firmware/isdbt_rio.inp
-  register: firmware_dir
-  changed_when: no
+  when: check_recdvb is failed
 
 - name: download firmware
   get_url:
     url: http://plex-net.co.jp/plex/px-s1ud/PX-S1UD_driver_Ver.1.0.1.zip
     dest: /tmp/PX-S1UD_driver_Ver.1.0.1.zip
-  when: not firmware_dir.stat.exists
+  when: check_recdvb is failed
 
 - name: make firmware unarchive directory
   file:
     path: /tmp/firmware
     state: directory
     force: yes
-  when: not firmware_dir.stat.exists
+  when: check_recdvb is failed
 
 - name: unarchive firmware
   unarchive:
     src: /tmp/PX-S1UD_driver_Ver.1.0.1.zip
     dest: /tmp/firmware
     remote_src: yes
-  when: not firmware_dir.stat.exists
+  when: check_recdvb is failed
 
 - name: set firmware
   copy:
@@ -63,7 +63,7 @@
     group: root
     mode: '0755'
     remote_src: yes
-  when: not firmware_dir.stat.exists
+  when: check_recdvb is failed
 
 - name: clean up firmware
   file:
@@ -72,49 +72,37 @@
   with_items:
    - firmware
    - PX-S1UD_driver_Ver.1.0.1.zip
-  when: not firmware_dir.stat.exists
-
-- name: check libarib25
-  command: which b25
-  register: check_b25
-  ignore_errors: yes
-  changed_when: no
+  when: check_recdvb is failed
 
 - name: get libarib25
   git:
     repo: "https://github.com/stz2012/libarib25.git"
     dest: /tmp/libarib25
     version: v0.2.5-20190204
-  when: check_b25 is failed
+  when: check_recdvb is failed
 
 - name: cmake libarib25
   command:
     cmd: cmake .
     chdir: /tmp/libarib25
-  when: check_b25 is failed
+  when: check_recdvb is failed
 
 - name: build libarib25
   make:
     chdir: /tmp/libarib25
-  when: check_b25 is failed
+  when: check_recdvb is failed
 
 - name: install libarib25
   make:
     chdir: /tmp/libarib25
     target: install
-  when: check_b25 is failed
+  when: check_recdvb is failed
 
 - name: clean up libarib25
   file:
     path: /tmp/libarib25
     state: absent
-  when: check_b25 is failed
-
-- name: check recdvb
-  command: which recdvb
-  register: check_recdvb
-  ignore_errors: yes
-  changed_when: no
+  when: check_recdvb is failed
 
 - name: download recdvb
   get_url:
