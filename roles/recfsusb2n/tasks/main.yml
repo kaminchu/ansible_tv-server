@@ -1,0 +1,48 @@
+---
+- name: check recfsusb2n
+  command: which recfsusb2n
+  register: check_recfsusb2n
+  ignore_errors: yes
+  changed_when: no
+
+- name: Install a list of packages
+  apt:
+    pkg:
+      - libboost-thread-dev
+      - libboost-filesystem-dev
+      - build-essential
+      - pkg-config
+      - cmake
+    state: latest
+    update_cache: yes
+  when: check_recfsusb2n is failed
+
+- name: copy recfsusb2n unarchive directory
+  copy:
+    src: recfsusb2n
+    dest: /tmp
+  when: check_recfsusb2n is failed
+
+- name: make build unarchive directory
+  file:
+    path: /tmp/recfsusb2n/build
+    state: directory
+    force: yes
+  when: check_recfsusb2n is failed
+
+- name: cmake recfsusb2n
+  command:
+    cmd: cmake ..
+    chdir: /tmp/recfsusb2n/build
+  when: check_recfsusb2n is failed
+
+- name: build recfsusb2n
+  make:
+    chdir: /tmp/recfsusb2n/build
+  when: check_recfsusb2n is failed
+
+- name: install recfsusb2n
+  make:
+    chdir: /tmp/recfsusb2n/build
+    target: install
+  when: check_recfsusb2n is failed
