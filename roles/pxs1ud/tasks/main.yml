@@ -1,0 +1,172 @@
+---
+- name: Install a list of packages
+  apt:
+    pkg:
+      - nano
+      - ntp
+      - wget
+      - curl
+      - git
+      - make
+      - cmake
+      - zip
+      - autoconf
+      - automake
+      - pcscd
+      - libpcsclite1
+      - libpcsclite-dev
+      - libccid
+      - pcsc-tools
+      - autoconf
+      - build-essential
+      - git-core
+      - libssl-dev
+      - libtool
+      - libboost-all-dev
+      - pkg-config
+      - yasm
+      - pkg-config
+    state: latest
+    update_cache: yes
+
+- name: check firmware
+  stat:
+    path:  /lib/firmware/isdbt_rio.inp
+  register: firmware_dir
+  changed_when: no
+
+- name: download firmware
+  get_url:
+    url: http://plex-net.co.jp/plex/px-s1ud/PX-S1UD_driver_Ver.1.0.1.zip
+    dest: /tmp/PX-S1UD_driver_Ver.1.0.1.zip
+  when: not firmware_dir.stat.exists
+
+- name: make firmware unarchive directory
+  file:
+    path: /tmp/firmware
+    state: directory
+    force: yes
+  when: not firmware_dir.stat.exists
+
+- name: unarchive firmware
+  unarchive:
+    src: /tmp/PX-S1UD_driver_Ver.1.0.1.zip
+    dest: /tmp/firmware
+    remote_src: yes
+  when: not firmware_dir.stat.exists
+
+- name: set firmware
+  copy:
+    src: /tmp/firmware/PX-S1UD_driver_Ver.1.0.1/x64/amd64/isdbt_rio.inp
+    dest: /lib/firmware/isdbt_rio.inp
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+  when: not firmware_dir.stat.exists
+
+- name: clean up firmware
+  file:
+    path: /tmp/{{ item }}
+    state: absent
+  with_items:
+   - firmware
+   - PX-S1UD_driver_Ver.1.0.1.zip
+  when: not firmware_dir.stat.exists
+
+- name: check libarib25
+  command: which b25
+  register: check_b25
+  ignore_errors: yes
+  changed_when: no
+
+- name: get libarib25
+  git:
+    repo: "https://github.com/stz2012/libarib25.git"
+    dest: /tmp/libarib25
+    version: v0.2.5-20190204
+  when: check_b25 is failed
+
+- name: cmake libarib25
+  command:
+    cmd: cmake .
+    chdir: /tmp/libarib25
+  when: check_b25 is failed
+
+- name: build libarib25
+  make:
+    chdir: /tmp/libarib25
+  when: check_b25 is failed
+
+- name: install libarib25
+  make:
+    chdir: /tmp/libarib25
+    target: install
+  when: check_b25 is failed
+
+- name: clean up libarib25
+  file:
+    path: /tmp/libarib25
+    state: absent
+  when: check_b25 is failed
+
+- name: check recdvb
+  command: which recdvb
+  register: check_recdvb
+  ignore_errors: yes
+  changed_when: no
+
+- name: download recdvb
+  get_url:
+    url: http://www13.plala.or.jp/sat/recdvb/recdvb-1.3.2.tgz
+    dest: /tmp/recdvb.tgz
+  when: check_recdvb is failed
+
+- name: make recdvb unarchive directory
+  file:
+    path: /tmp/recdvb
+    state: directory
+    force: yes
+  when: check_recdvb is failed
+
+- name: unarchive recdvb
+  unarchive:
+    src: /tmp/recdvb.tgz
+    dest: /tmp/recdvb
+    extra_opts:
+      - --strip-components
+      - "1"
+    remote_src: yes
+  when: check_recdvb is failed
+
+- name: autogen recdvb
+  command:
+    cmd: ./autogen.sh
+    chdir: /tmp/recdvb
+  when: check_recdvb is failed
+
+- name: configure recdvb
+  command:
+    cmd: ./configure --enable-b25
+    chdir: /tmp/recdvb
+  when: check_recdvb is failed
+
+- name: build recdvb
+  make:
+    chdir: /tmp/recdvb
+  when: check_recdvb is failed
+
+- name: install recdvb
+  make:
+    chdir: /tmp/recdvb
+    target: install
+  when: check_recdvb is failed
+
+- name: clean up recdvb
+  file:
+    path: /tmp/{{ item }}
+    state: absent
+  with_items:
+   - recdvb
+   - recdvb.tgz
+  when: check_recdvb is failed
