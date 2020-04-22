@@ -6,10 +6,12 @@
     "ffmpeg": "/snap/bin/ffmpeg",
     "ffprobe": "/snap/bin/ffmpeg.ffprobe",
     "maxEncode": 2,
+{% if epgstation_user != '' %}
     "basicAuth": {
         "user": "{{ epgstation_user }}",
         "password": "{{ epgstation_password }}"
     },
+{% endif %}
     "encode": [
         {
             "name": "H264",
