@@ -1,5 +1,5 @@
 [server]
-epgstation
+tv
 
 [all:vars]
 stage=production
