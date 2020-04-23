@@ -12,13 +12,14 @@
       - nano
       - vainfo
       - python-dev
+      - snapd
     state: latest
     update_cache: yes
 
 - name: Install ffmpeg
   snap:
     name: ffmpeg
-    channel: latest/edge
+    classic: yes
 
 - name: check node
   command: which node
