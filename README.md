@@ -16,8 +16,20 @@ Host tv
   IdentityFile 鍵
 ```
 
+pipenv
+
+```
+pipenv install
+```
+
 ## 実行
 
 ```
-ansible-playbook -i production site.yml
+pipenv run ansible-playbook -i production site.yml
+```
+
+sudo パスワードが必要なら
+
+```
+pipenv run ansible-playbook -i production site.yml --ask-become-pass
 ```

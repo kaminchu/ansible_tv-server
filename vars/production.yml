@@ -2,3 +2,8 @@
 epgstation_port: 8888
 epgstation_mirakurun_path: "http://127.0.0.1:40772/"
 epgstation_enable_vaapi: yes
+
+tuner_pxs1ud0_disabled: "false"
+tuner_pxs1ud1_disabled: "false"
+tuner_pxs1ud2_disabled: "false"
+tuner_pxs1ud3_disabled: "false"
